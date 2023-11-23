@@ -1,35 +1,34 @@
-# Importa as bibliotecas necessárias
 from flask import Flask, jsonify, request
 from flask_cors import CORS
 import pandas as pd
 
-# Cria a aplicação Flask
 app = Flask(__name__)
 CORS(app)
 
-# Tenta criar o arquivo Text.csv caso ele não exista e escreve o cabeçalho
 try:
     open('Text.csv', 'x')
-    with open("Text.csv", "w") as arquivo:
+    with open("Text.csv", "a", encoding='utf-8') as arquivo:
          arquivo.write("ID,TAREFA\n") 
 except:
     pass
 
 @app.route("/list", methods=['GET'])
 def listarTarefas():    
-    tarefas = pd.read_csv('Text.csv')
+
+    tarefas = pd.read_csv('Text.csv', encoding='utf-8')
     tarefas = tarefas.to_dict('records')    
     return jsonify(tarefas)
 
 @app.route("/add", methods=['POST'])
 def addTarefas():
     item = request.json  
-    tarefas = pd.read_csv('Text.csv')
+   
+    tarefas = pd.read_csv('Text.csv', encoding='utf-8')
     tarefas = tarefas.to_dict('records') 
     id = len(tarefas) + 1
-    with open("Text.csv", "a") as arquivo:
+    with open("Text.csv", "a", encoding='utf-8') as arquivo:
          arquivo.write(f"{id},{item['Tarefa']}\n")    
-    tarefas = pd.read_csv('Text.csv')
+    tarefas = pd.read_csv('Text.csv', encoding='utf-8')
     tarefas = tarefas.to_dict('records')        
     return jsonify(tarefas)
 
@@ -41,7 +40,7 @@ def deleteTarefa():
     if id is None:
         return jsonify({"error": "ID da tarefa não fornecido"}), 400
 
-    tarefas = pd.read_csv('Text.csv')
+    tarefas = pd.read_csv('Text.csv', encoding='utf-8')
 
     if id not in tarefas['ID'].values:
         return jsonify({"error": "Tarefa não encontrada"}), 404
@@ -54,16 +53,12 @@ def deleteTarefa():
 
     return jsonify(tarefas.to_dict('records'))
 
-@app.route("/update", methods=["PUT"])
-def update_task():
-    data = request.json
-    id = data.get('id')
-    nova_tarefa = data.get('nova_tarefa')
+@app.route("/update/<int:id>", methods=["PUT"])
+def updateTarefa(id):
+    nova_tarefa = request.json.get('TAREFA')
 
-    if id is None or nova_tarefa is None:
-        return jsonify({"error": "ID da tarefa e/ou nova tarefa não fornecidos"}), 400
-
-    tarefas = pd.read_csv('Text.csv')
+    
+    tarefas = pd.read_csv('Text.csv', encoding='utf-8')
 
     if id not in tarefas['ID'].values:
         return jsonify({"error": "Tarefa não encontrada"}), 404
@@ -73,7 +68,6 @@ def update_task():
     tarefas.to_csv('Text.csv', index=False)
 
     return jsonify(tarefas.to_dict('records'))
-
 
 if __name__ == '__main__':
     app.run(debug=True, host="0.0.0.0")
