@@ -1,14 +1,14 @@
 document.addEventListener('DOMContentLoaded', function () {
     const tabela = document.querySelector(".tabela-js");
-  
-    axios.get(` http://10.109.142.63:5000/list`)
+
+    axios.get(`http://127.0.0.1:5000/list`)
         .then(function (resposta) {
             getData(resposta.data);
         })
         .catch(function (error) {
             console.error(error);
         });
-  
+
     function getData(dados) {
         tabela.innerHTML = dados.map(item => `
         <tr>
@@ -21,10 +21,10 @@ document.addEventListener('DOMContentLoaded', function () {
         </span></button></td>
     </tr>`
         ).join('');
-  
+
         todos_Eventos();
-      };
-  
+    };
+
     function todos_Eventos() {
         document.querySelector("#add-tarefa").addEventListener("click", function () {
             const tarefa = document.querySelector("#tarefa").value;
@@ -32,20 +32,21 @@ document.addEventListener('DOMContentLoaded', function () {
                 alert("Digite uma tarefa!");
                 return;
             }
-  
-            axios.post(` http://10.109.142.63:5000/add`, { Tarefa: tarefa })
+
+            axios.post(`http://127.0.0.1:5000/add`, { Tarefa: tarefa })
                 .then(function () {
                     loadTasks();
                 })
                 .catch(function (error) {
                     console.error(error);
                 });
-          });
-  
+        });
+
+        // EXCLUIR TAREFA
         document.querySelectorAll(".delete-btn").forEach(btn => {
             btn.addEventListener("click", function (e) {
-                const id = e.target.parentElement.parentElement.firstElementChild.textContent;
-                axios.delete(` http://10.109.142.63:5000/delete/${id}`)
+                const id = e.target.closest("tr").querySelector("th").textContent;
+                axios.delete(`http://127.0.0.1:5000/delete`, { data: { id: parseInt(id) } })
                     .then(function () {
                         loadTasks();
                     })
@@ -54,43 +55,40 @@ document.addEventListener('DOMContentLoaded', function () {
                     });
             });
         });
-  
-        document.querySelector(".tabela-js").addEventListener("click", function (e) {
-            const editBtn = e.target.closest(".edit-btn");
-            if (editBtn) {
-                const row = editBtn.closest("tr");
-                const id = row.querySelector("th").textContent;
-                const tarefa = row.querySelector("td").textContent;
-                document.querySelector("#edit-tarefa").value = tarefa;
-            }
+
+        function updateTarefa(id, novaTarefa) {
+            axios.put(`http://127.0.0.1:5000/update/${id}`, { TAREFA: novaTarefa })
+                .then(function () {
+                    Carregar();
+                })
+                .catch(function (error) {
+                    console.error(error);
+                });
+        }
+
+        document.querySelectorAll(".edit-btn").forEach(btn => {
+            btn.addEventListener("click", function (e) {
+                const id = e.target.closest("tr").querySelector("th").textContent;
+                
+                const novaTarefa = prompt("Digite a nova descrição da tarefa:");
+
+                if (novaTarefa !== null) {
+                    updateTarefa(parseInt(id), novaTarefa);
+                }
+            });
         });
-  
-        document.querySelector("#edit-tarefa-btn").addEventListener("click", function () {
-            const tarefaupdate = document.querySelector("#edit-tarefa").value;
-            const id = document.querySelector(".edit-btn").parentElement.parentElement.firstElementChild.textContent;
-            
-            if (id) {
-                axios.put(` http://10.109.142.63:5000/${id}`, { Tarefa: tarefaupdate })
-                    .then(function () {
-                        loadTasks();
-                    })
-                    .catch(function (error) {
-                        console.error(error);
-                    })
-                    .finally(function () {
-                        id = null;
-                    });
-            }
-        });
-      }
-  
+
+
+
+    }
+
     function loadTasks() {
-        axios.get(` http://10.109.142.63:5000/list`)
+        axios.get(`http://127.0.0.1:5000/list`)
             .then(function (resposta) {
                 getData(resposta.data);
             })
             .catch(function (error) {
                 console.error(error);
             });
-          }
-      });
+    }
+});
