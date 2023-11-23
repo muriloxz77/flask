@@ -2,16 +2,13 @@ html::before{
   content: "";
   position: absolute;
   width: 100%;
-  height: 200px;
-  background-color:rgb(40, 35, 7);
+  height: 100%;
+  background-image: linear-gradient(#4d3523, #1e190a);
   z-index: -1;
-} 
-
+}
 .navbar{
   height: 80px;
   align-content: first baseline;
-  padding-left: 30px;
-  padding-right: 30px;
 }
 
 .custom-icon {
@@ -23,8 +20,11 @@ html::before{
 }
 
 .btn{
-  border: rgb(255, 255, 255);
+  border: black;
 }
 
-
+#but{
+  background-color: white;
+  color: black;
+}
 
